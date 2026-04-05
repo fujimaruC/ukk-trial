@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Mikrotik & Winbox - Konfigurasi Network</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #1557b0;
+            --success: #34a853;
+            --warning: #fbbc04;
+            --danger: #ea4335;
+            --dark: #202124;
+            --gray: #5f6368;
+            --light-gray: #f1f3f4;
+            --border: #dadce0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: #fff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .nav-pills {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            padding: 0.25rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-pills::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .nav-pills::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .nav-pill {
+            flex-shrink: 0;
+            padding: 0.625rem 1rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            font-size: 1.375rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--dark);
+        }
+
+        .step {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-content {
+            margin-left: 2.5rem;
+            font-size: 0.9375rem;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .alert-info {
+            background: #e8f0fe;
+            border-left: 4px solid var(--primary);
+            color: #1967d2;
+        }
+
+        .alert-warning {
+            background: #fef7e0;
+            border-left: 4px solid var(--warning);
+            color: #b36800;
+        }
+
+        .alert-success {
+            background: #e6f4ea;
+            border-left: 4px solid var(--success);
+            color: #137333;
+        }
+
+        .alert-danger {
+            background: #fce8e6;
+            border-left: 4px solid var(--danger);
+            color: #c5221f;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .config-example {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .config-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .config-row:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .config-value {
+            font-family: 'Courier New', monospace;
+            color: var(--dark);
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+        }
+
+        strong {
+            color: var(--dark);
+        }
+
+        .topology-diagram {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .topology-simple {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .topology-with-internet {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .topology-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .device {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .device-mikrotik {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .device-pc {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .device-internet {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .connection-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            min-width: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--gray);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 1.25rem;
+            }
+
+            .config-row {
+                grid-template-columns: 1fr;
+                gap: 0.25rem;
+            }
+
+            .config-label {
+                margin-bottom: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Tutorial Mikrotik & Winbox</h1>
+        <p>Panduan Lengkap Konfigurasi Network - Dari Dasar hingga Mahir</p>
+    </div>
+
+    <div class="container">
+        <nav class="nav-pills">
+            <button class="nav-pill active" onclick="showSection('winbox')">Winbox Setup</button>
+            <button class="nav-pill" onclick="showSection('no-internet')">Tanpa Internet</button>
+            <button class="nav-pill" onclick="showSection('with-internet')">Dengan Internet</button>
+            <button class="nav-pill" onclick="showSection('troubleshoot')">Troubleshooting</button>
+        </nav>
+
+        <!-- Section 1: Winbox Setup -->
+        <div id="winbox" class="section active">
+            <div class="card">
+                <h2>🚀 Cara Masuk Winbox Mikrotik</h2>
+                
+                <div class="alert alert-info">
+                    <strong>💡 Info:</strong> Winbox adalah aplikasi GUI untuk konfigurasi Mikrotik RouterOS. Download dari <strong>mikrotik.com/download</strong>
+                </div>
+
+                <h3>Metode 1: MAC Address (Paling Mudah)</h3>
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Buka Winbox
+                    </div>
+                    <div class="step-content">
+                        Jalankan winbox.exe atau winbox64.exe (tidak perlu install)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Klik tombol "..." (Neighbors)
+                    </div>
+                    <div class="step-content">
+                        Winbox akan otomatis scan Mikrotik yang terhubung di jaringan
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Pilih Mikrotik dari List
+                    </div>
+                    <div class="step-content">
+                        Klik pada MAC Address Mikrotik yang muncul (format: XX:XX:XX:XX:XX:XX)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Login
+                    </div>
+                    <div class="step-content">
+                        <strong>Username:</strong> admin<br>
+                        <strong>Password:</strong> (kosongkan jika baru/default)<br>
+                        Klik <strong>Connect</strong>
+                    </div>
+                </div>
+
+                <h3>Metode 2: IP Address Manual</h3>
+                
+                <div class="alert alert-warning">
+                    <strong>⚠️ Kapan pakai metode ini?</strong> Jika Mikrotik tidak muncul di list Neighbors (masalah network/firewall)
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Pastikan PC dan Mikrotik Satu Network
+                    </div>
+                    <div class="step-content">
+                        Cek IP Mikrotik di label RouterBOARD (biasanya 192.168.88.1)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Setting IP PC Anda
+                    </div>
+                    <div class="step-content">
+                        <strong>Windows:</strong><br>
+                        Control Panel → Network Connections → Klik kanan Ethernet → Properties → IPv4<br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">IP Address:</div>
+                                <div class="config-value">192.168.88.2</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Subnet Mask:</div>
+                                <div class="config-value">255.255.255.0</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Gateway:</div>
+                                <div class="config-value">192.168.88.1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Tambah IP Manual di Winbox
+                    </div>
+                    <div class="step-content">
+                        Di kolom "Connect To", ketik manual: <strong>192.168.88.1</strong><br>
+                        Lalu klik Connect
+                    </div>
+                </div>
+
+                <h3>❌ Troubleshooting: Mikrotik Tidak Muncul di List</h3>
+                
+                <div class="alert alert-danger">
+                    <strong>Problem:</strong> Neighbor list kosong / Mikrotik tidak terdeteksi
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Cek Kabel Network
+                    </div>
+                    <div class="step-content">
+                        Pastikan kabel LAN terhubung dari PC ke port Mikrotik (lampu indikator menyala)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Disable Firewall/Antivirus Sementara
+                    </div>
+                    <div class="step-content">
+                        Windows Firewall atau antivirus bisa block neighbor discovery protocol
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Reset IP di Network Adapter
+                    </div>
+                    <div class="step-content">
+                        Buka CMD (Admin), jalankan:<br>
+                        <div class="code-block">ipconfig /release<br>ipconfig /renew</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Coba IP yang Nyangkut di NCP/DHCP
+                    </div>
+                    <div class="step-content">
+                        Kadang IP lama masih nyangkut. Coba setting manual:<br>
+                        • 192.168.88.2 (default Mikrotik network)<br>
+                        • 192.168.1.2 (network umum lain)<br>
+                        • 10.10.10.2 (alternatif lain)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: No Internet -->
+        <div id="no-internet" class="section">
+            <div class="card">
+                <h2>🔗 Konfigurasi: Beda IP Bisa Ping (Tanpa Internet)</h2>
+                
+                <div class="alert alert-info">
+                    <strong>🎯 Tujuan:</strong> Menghubungkan 2 PC dengan IP berbeda melalui Mikrotik sebagai router, tanpa koneksi internet.
+                </div>
+
+                <div class="topology-diagram">
+                    <h3 style="margin-bottom: 1rem;">Topologi Network</h3>
+                    <div class="topology-simple">
+                        <div class="device device-pc">PC 1<br><small>192.168.1.10</small></div>
+                        <div class="connection-line"></div>
+                        <div class="device device-mikrotik">MIKROTIK<br><small>Router</small></div>
+                        <div class="connection-line"></div>
+                        <div class="device device-pc">PC 2<br><small>192.168.2.10</small></div>
+                    </div>
+                </div>
+
+                <h3>Step-by-Step Configuration</h3>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Login ke Winbox
+                    </div>
+                    <div class="step-content">
+                        Ikuti cara login di tab "Winbox Setup"
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Setting IP Address untuk Interface 1
+                    </div>
+                    <div class="step-content">
+                        Menu: <strong>IP → Addresses</strong> → Klik tombol <strong>[+]</strong><br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Address:</div>
+                                <div class="config-value">192.168.1.1/24</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Interface:</div>
+                                <div class="config-value">ether1</div>
+                            </div>
+                        </div>
+                        Klik <strong>OK</strong>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Setting IP Address untuk Interface 2
+                    </div>
+                    <div class="step-content">
+                        Klik <strong>[+]</strong> lagi untuk tambah IP kedua:<br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Address:</div>
+                                <div class="config-value">192.168.2.1/24</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Interface:</div>
+                                <div class="config-value">ether2</div>
+                            </div>
+                        </div>
+                        Klik <strong>OK</strong>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>✅ Penjelasan:</strong><br>
+                    • <strong>192.168.1.1/24</strong> = IP untuk network pertama (subnet 192.168.1.0)<br>
+                    • <strong>192.168.2.1/24</strong> = IP untuk network kedua (subnet 192.168.2.0)<br>
+                    • <strong>/24</strong> = Subnet mask 255.255.255.0 (255 host per network)
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Setting IP di PC 1
+                    </div>
+                    <div class="step-content">
+                        Hubungkan PC 1 ke <strong>ether1</strong> Mikrotik<br>
+                        Setting IP manual di PC 1:<br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">IP Address:</div>
+                                <div class="config-value">192.168.1.10</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Subnet Mask:</div>
+                                <div class="config-value">255.255.255.0</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Gateway:</div>
+                                <div class="config-value">192.168.1.1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">5</span>
+                        Setting IP di PC 2
+                    </div>
+                    <div class="step-content">
+                        Hubungkan PC 2 ke <strong>ether2</strong> Mikrotik<br>
+                        Setting IP manual di PC 2:<br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">IP Address:</div>
+                                <div class="config-value">192.168.2.10</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Subnet Mask:</div>
+                                <div class="config-value">255.255.255.0</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Gateway:</div>
+                                <div class="config-value">192.168.2.1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">6</span>
+                        Test Koneksi dengan Ping
+                    </div>
+                    <div class="step-content">
+                        <strong>Dari PC 1</strong>, buka CMD dan ping ke PC 2:<br>
+                        <div class="code-block">ping 192.168.2.10</div>
+                        <strong>Dari PC 2</strong>, buka CMD dan ping ke PC 1:<br>
+                        <div class="code-block">ping 192.168.1.10</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>🎉 Berhasil!</strong> Jika muncul "Reply from..." berarti kedua PC sudah bisa berkomunikasi meskipun beda subnet/network!
+                </div>
+
+                <h3>📋 Ringkasan Konfigurasi</h3>
+                <div class="config-example">
+                    <strong>Mikrotik:</strong>
+                    <div class="config-row">
+                        <div class="config-label">ether1:</div>
+                        <div class="config-value">192.168.1.1/24</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">ether2:</div>
+                        <div class="config-value">192.168.2.1/24</div>
+                    </div>
+                </div>
+                <div class="config-example" style="margin-top: 1rem;">
+                    <strong>PC 1:</strong>
+                    <div class="config-row">
+                        <div class="config-label">IP:</div>
+                        <div class="config-value">192.168.1.10</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Gateway:</div>
+                        <div class="config-value">192.168.1.1</div>
+                    </div>
+                </div>
+                <div class="config-example" style="margin-top: 1rem;">
+                    <strong>PC 2:</strong>
+                    <div class="config-row">
+                        <div class="config-label">IP:</div>
+                        <div class="config-value">192.168.2.10</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Gateway:</div>
+                        <div class="config-value">192.168.2.1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: With Internet -->
+        <div id="with-internet" class="section">
+            <div class="card">
+                <h2>🌐 Konfigurasi: Beda IP Bisa Ping + Internet</h2>
+                
+                <div class="alert alert-info">
+                    <strong>🎯 Tujuan:</strong> Sama seperti sebelumnya, tapi sekarang semua PC juga bisa akses internet melalui Mikrotik!
+                </div>
+
+                <div class="topology-diagram">
+                    <h3 style="margin-bottom: 1rem;">Topologi Network dengan Internet</h3>
+                    <div class="topology-with-internet">
+                        <div class="topology-row">
+                            <div class="device device-internet">INTERNET<br><small>ISP/Modem</small></div>
+                        </div>
+                        <div class="topology-row">
+                            <div class="connection-line" style="width: 2px; height: 30px; background: var(--border); margin: 0 auto;"></div>
+                        </div>
+                        <div class="topology-row">
+                            <div class="device device-mikrotik">MIKROTIK<br><small>Router + NAT</small></div>
+                        </div>
+                        <div class="topology-row">
+                            <div class="connection-line" style="width: 2px; height: 30px; background: var(--border); margin: 0 auto;"></div>
+                        </div>
+                        <div class="topology-row">
+                            <div class="device device-pc">PC 1<br><small>192.168.1.10</small></div>
+                            <div class="device device-pc">PC 2<br><small>192.168.2.10</small></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Step-by-Step Configuration</h3>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Lakukan Konfigurasi Dasar (Langkah 1-5 dari Tab Sebelumnya)
+                    </div>
+                    <div class="step-content">
+                        Setup IP untuk ether1, ether2, PC 1, dan PC 2 seperti panduan "Tanpa Internet"
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Hubungkan Mikrotik ke Internet
+                    </div>
+                    <div class="step-content">
+                        Sambungkan kabel dari <strong>Modem/ISP</strong> ke port <strong>ether3</strong> (atau port WAN) di Mikrotik
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Setting DHCP Client untuk WAN
+                    </div>
+                    <div class="step-content">
+                        Menu: <strong>IP → DHCP Client</strong> → Klik <strong>[+]</strong><br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Interface:</div>
+                                <div class="config-value">ether3</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">☑️ Use Peer DNS:</div>
+                                <div class="config-value">Centang (enabled)</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">☑️ Add Default Route:</div>
+                                <div class="config-value">Centang (enabled)</div>
+                            </div>
+                        </div>
+                        Klik <strong>OK</strong>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>💡 Penjelasan:</strong> DHCP Client membuat Mikrotik mendapat IP otomatis dari modem/ISP Anda (seperti PC biasa). Status "bound" = koneksi berhasil!
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Setting DNS Server
+                    </div>
+                    <div class="step-content">
+                        Menu: <strong>IP → DNS</strong><br>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Servers:</div>
+                                <div class="config-value">8.8.8.8, 8.8.4.4</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">☑️ Allow Remote Requests:</div>
+                                <div class="config-value">Centang (enabled)</div>
+                            </div>
+                        </div>
+                        Klik <strong>OK</strong>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">5</span>
+                        Setup NAT (Masquerade) <span class="badge badge-warning">PENTING!</span>
+                    </div>
+                    <div class="step-content">
+                        Menu: <strong>IP → Firewall</strong> → Tab <strong>NAT</strong> → Klik <strong>[+]</strong><br><br>
+                        <strong>Tab General:</strong>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Chain:</div>
+                                <div class="config-value">srcnat</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Out. Interface:</div>
+                                <div class="config-value">ether3</div>
+                            </div>
+                        </div>
+                        <strong>Tab Action:</strong>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Action:</div>
+                                <div class="config-value">masquerade</div>
+                            </div>
+                        </div>
+                        Klik <strong>OK</strong>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>⚠️ Kenapa Butuh NAT?</strong><br>
+                    NAT (Network Address Translation) mengubah IP private (192.168.x.x) menjadi IP public yang diberikan ISP. Tanpa NAT, PC Anda tidak bisa akses internet!
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">6</span>
+                        Setting DNS di PC 1 dan PC 2
+                    </div>
+                    <div class="step-content">
+                        Tambahkan DNS Server di setting IP masing-masing PC:<br><br>
+                        <strong>PC 1:</strong>
+                        <div class="config-example">
+                            <div class="config-row">
+                                <div class="config-label">Preferred DNS:</div>
+                                <div class="config-value">8.8.8.8</div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-label">Alternate DNS:</div>
+                                <div class="config-value">8.8.4.4</div>
+                            </div>
+                        </div>
+                        <strong>PC 2:</strong> (sama seperti PC 1)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">7</span>
+                        Test Koneksi Lengkap
+                    </div>
+                    <div class="step-content">
+                        <strong>Test 1 - Ping antar PC (harus berhasil):</strong><br>
+                        <div class="code-block">ping 192.168.2.10  (dari PC 1 ke PC 2)<br>ping 192.168.1.10  (dari PC 2 ke PC 1)</div>
+                        
+                        <strong>Test 2 - Ping Gateway (harus berhasil):</strong><br>
+                        <div class="code-block">ping 192.168.1.1  (dari PC 1)<br>ping 192.168.2.1  (dari PC 2)</div>
+                        
+                        <strong>Test 3 - Ping Internet (harus berhasil):</strong><br>
+                        <div class="code-block">ping 8.8.8.8  (Google DNS)<br>ping google.com</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>🎉 Sempurna!</strong> Sekarang:<br>
+                    ✅ PC 1 dan PC 2 bisa saling ping (beda network)<br>
+                    ✅ Kedua PC bisa akses internet<br>
+                    ✅ Mikrotik berfungsi sebagai router + gateway
+                </div>
+
+                <h3>📋 Ringkasan Konfigurasi Lengkap</h3>
+                <div class="config-example">
+                    <strong>Mikrotik Interfaces:</strong>
+                    <div class="config-row">
+                        <div class="config-label">ether1 (LAN 1):</div>
+                        <div class="config-value">192.168.1.1/24</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">ether2 (LAN 2):</div>
+                        <div class="config-value">192.168.2.1/24</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">ether3 (WAN):</div>
+                        <div class="config-value">DHCP Client (dari ISP)</div>
+                    </div>
+                </div>
+                <div class="config-example" style="margin-top: 1rem;">
+                    <strong>Firewall NAT:</strong>
+                    <div class="config-row">
+                        <div class="config-label">Chain:</div>
+                        <div class="config-value">srcnat</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Out. Interface:</div>
+                        <div class="config-value">ether3</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Action:</div>
+                        <div class="config-value">masquerade</div>
+                    </div>
+                </div>
+                <div class="config-example" style="margin-top: 1rem;">
+                    <strong>DNS:</strong>
+                    <div class="config-row">
+                        <div class="config-label">Servers:</div>
+                        <div class="config-value">8.8.8.8, 8.8.4.4</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Allow Remote:</div>
+                        <div class="config-value">✅ Yes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Troubleshooting -->
+        <div id="troubleshoot" class="section">
+            <div class="card">
+                <h2>🔧 Troubleshooting & Tips</h2>
+
+                <h3>❌ Problem 1: Ping Tidak Berhasil Antar PC</h3>
+                <div class="alert alert-danger">
+                    <strong>Symptom:</strong> Request timed out / Destination host unreachable
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Cek IP Configuration
+                    </div>
+                    <div class="step-content">
+                        Di CMD, jalankan: <code>ipconfig</code><br>
+                        Pastikan IP, Subnet, dan Gateway sesuai konfigurasi
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Cek IP di Mikrotik
+                    </div>
+                    <div class="step-content">
+                        <strong>IP → Addresses</strong><br>
+                        Pastikan ada 2 IP (192.168.1.1/24 dan 192.168.2.1/24) dengan interface yang benar
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Disable Windows Firewall Sementara
+                    </div>
+                    <div class="step-content">
+                        Control Panel → Windows Defender Firewall → Turn off (untuk testing)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Ping ke Gateway Dulu
+                    </div>
+                    <div class="step-content">
+                        Dari PC 1: <code>ping 192.168.1.1</code><br>
+                        Dari PC 2: <code>ping 192.168.2.1</code><br>
+                        Jika ini berhasil tapi antar-PC gagal, masalah ada di routing
+                    </div>
+                </div>
+
+                <h3>❌ Problem 2: Tidak Bisa Akses Internet</h3>
+                <div class="alert alert-danger">
+                    <strong>Symptom:</strong> Bisa ping antar PC, tapi tidak bisa browsing/ping 8.8.8.8
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Cek Status DHCP Client
+                    </div>
+                    <div class="step-content">
+                        <strong>IP → DHCP Client</strong><br>
+                        Status harus <strong>"bound"</strong> (warna hijau)<br>
+                        Jika bukan, masalah di koneksi modem/ISP
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Cek Firewall NAT
+                    </div>
+                    <div class="step-content">
+                        <strong>IP → Firewall → NAT</strong><br>
+                        Harus ada 1 rule: srcnat + masquerade + out-interface ether3<br>
+                        Jika tidak ada, buat rule baru!
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Cek DNS Configuration
+                    </div>
+                    <div class="step-content">
+                        <strong>IP → DNS</strong><br>
+                        Servers: 8.8.8.8, 8.8.4.4<br>
+                        Allow Remote Requests: ✅ Centang
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Test dari Mikrotik Langsung
+                    </div>
+                    <div class="step-content">
+                        <strong>Tools → Ping</strong><br>
+                        Ping: 8.8.8.8<br>
+                        Jika berhasil dari Mikrotik tapi gagal dari PC → masalah di NAT/DNS
+                    </div>
+                </div>
+
+                <h3>❌ Problem 3: DHCP Client Tidak Bound</h3>
+                <div class="alert alert-danger">
+                    <strong>Symptom:</strong> DHCP Client status "searching" terus-menerus
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Cek Kabel WAN
+                    </div>
+                    <div class="step-content">
+                        Pastikan kabel dari modem ke ether3 tersambung dengan baik
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Cek Modem Status
+                    </div>
+                    <div class="step-content">
+                        Pastikan modem sudah online (lampu indikator internet menyala)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Ganti Interface WAN
+                    </div>
+                    <div class="step-content">
+                        Coba pindah ke port lain (ether4/ether5), lalu update DHCP Client
+                    </div>
+                </div>
+
+                <h3>💡 Tips & Best Practices</h3>
+
+                <div class="alert alert-success">
+                    <strong>✅ Selalu Backup Konfigurasi!</strong><br>
+                    Menu: <strong>Files</strong> → <strong>Backup</strong> → Simpan file .backup
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>🔒 Keamanan:</strong><br>
+                    • Ganti password default Mikrotik<br>
+                    • Disable unused services (Telnet, FTP, etc.)<br>
+                    • Enable firewall filter rules untuk proteksi
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>📝 Dokumentasi:</strong><br>
+                    Catat semua IP address dan konfigurasi Anda untuk referensi di masa depan!
+                </div>
+
+                <h3>🎓 Konsep Penting yang Perlu Dipahami</h3>
+
+                <div class="config-example">
+                    <strong>Subnet & CIDR Notation:</strong>
+                    <div class="config-row">
+                        <div class="config-label">/24:</div>
+                        <div class="config-value">255.255.255.0 (256 host, 254 usable)</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">/16:</div>
+                        <div class="config-value">255.255.0.0 (65536 host)</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">/30:</div>
+                        <div class="config-value">255.255.255.252 (4 host, 2 usable - untuk link point-to-point)</div>
+                    </div>
+                </div>
+
+                <div class="config-example" style="margin-top: 1rem;">
+                    <strong>Private IP Ranges (RFC 1918):</strong>
+                    <div class="config-row">
+                        <div class="config-label">Class A:</div>
+                        <div class="config-value">10.0.0.0 - 10.255.255.255</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Class B:</div>
+                        <div class="config-value">172.16.0.0 - 172.31.255.255</div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-label">Class C:</div>
+                        <div class="config-value">192.168.0.0 - 192.168.255.255</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Tutorial Mikrotik & Winbox</strong> - Panduan Lengkap untuk Pemula</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8125rem;">Semoga bermanfaat! 🚀</p>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all pills
+            const pills = document.querySelectorAll('.nav-pill');
+            pills.forEach(pill => pill.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked pill
+            event.target.classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
